@@ -6,6 +6,7 @@ const connectDB = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const bookRoutes = require("./src/routes/bookRoutes")
 const issuanceRoutes = require("./src/routes/issuanceRoutes")
+const userRoutes  = require("./src/routes/userRoutes")
 dotenv.config();
 connectDB();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/issuance",issuanceRoutes)
+app.use("/api/user", userRoutes)
 
 // Global error handler
 app.use((err, req, res, next) => {

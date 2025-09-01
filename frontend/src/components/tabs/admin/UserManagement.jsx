@@ -1,90 +1,99 @@
-import React, { useState } from "react";
-
-// Dummy user data
-const initialUsers = [
-  { id: 1, name: "John Doe", email: "john@example.com" },
-  { id: 2, name: "Jane Smith", email: "jane@example.com" },
-  { id: 3, name: "Alice Green", email: "alice@example.com" },
-];
-
-// Dummy issued/returned books
-const issuedBooks = [
-  {
-    id: 1,
-    title: "Clean Code",
-    issuedToId: 1,
-    issueDate: "2025-08-01",
-    dueDate: "2025-08-15",
-  },
-  {
-    id: 2,
-    title: "Atomic Habits",
-    issuedToId: 2,
-    issueDate: "2025-08-03",
-    dueDate: "2025-08-17",
-  },
-];
-
-const returnedBooks = [
-  {
-    id: 3,
-    title: "The Pragmatic Programmer",
-    issuedToId: 1,
-    issueDate: "2025-07-15",
-    returnDate: "2025-07-29",
-  },
-];
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { userRoute } from "@/utils/APIRoutes";
 
 const UserManagement = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all"); // ✅ role filter
   const [selectedUserIssued, setSelectedUserIssued] = useState([]);
   const [selectedUserReturned, setSelectedUserReturned] = useState([]);
   const [activeModal, setActiveModal] = useState(null); // 'issued', 'returned', 'edit'
   const [editingUser, setEditingUser] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", email: "" });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    role: "member",
+  });
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ✅ Fetch users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  const handleViewIssued = (userId) => {
-    const books = issuedBooks.filter((b) => b.issuedToId === userId);
-    setSelectedUserIssued(books);
-    setActiveModal("issued");
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(userRoute);
+      setUsers(res.data);
+      console.log(users)
+    } catch (err) {
+      console.error("Error fetching users", err);
+    }
   };
 
-  const handleViewReturned = (userId) => {
-    const books = returnedBooks.filter((b) => b.issuedToId === userId);
-    setSelectedUserReturned(books);
-    setActiveModal("returned");
+  const handleViewIssued = async (userId) => {
+    try {
+      const res = await axios.get(`${userRoute}/${userId}/issued`);
+      setSelectedUserIssued(res.data);
+      setActiveModal("issued");
+    } catch (err) {
+      console.error("Error fetching issued books", err);
+    }
+  };
+
+  const handleViewReturned = async (userId) => {
+    try {
+      const res = await axios.get(`${userRoute}/${userId}/returned`);
+      setSelectedUserReturned(res.data);
+      setActiveModal("returned");
+    } catch (err) {
+      console.error("Error fetching returned books", err);
+    }
   };
 
   const handleEditUser = (user) => {
     setEditingUser(user);
-    setEditForm({ name: user.name, email: user.email });
+    setEditForm({
+      name: user.name,
+      email: user.email,
+      role: user.role || "user",
+    });
     setActiveModal("edit");
   };
 
-  const handleUpdateUser = () => {
-    setUsers(
-      users.map((u) => (u.id === editingUser.id ? { ...u, ...editForm } : u))
-    );
-    setEditingUser(null);
-    setActiveModal(null);
-  };
-
-  const handleDeleteUser = (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((u) => u.id !== userId));
+  const handleUpdateUser = async () => {
+    try {
+      await axios.put(`${userRoute}/${editingUser._id}`, editForm);
+      fetchUsers(); // refresh
+      setEditingUser(null);
+      setActiveModal(null);
+    } catch (err) {
+      console.error("Error updating user", err);
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await axios.delete(`${userRoute}/${userId}`);
+        fetchUsers(); // refresh
+      } catch (err) {
+        console.error("Error deleting user", err);
+      }
+    }
+  };
+
+  // ✅ Filtering
+  const filteredUsers = users.filter(
+    (user) =>
+      (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (roleFilter === "all" || user.role === roleFilter)
+  );
+
   return (
     <div className="p-4">
-      {/* Search Users */}
+      {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
         <input
           type="text"
@@ -93,6 +102,16 @@ const UserManagement = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border p-2 rounded w-full sm:w-1/3"
         />
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          className="border p-2 rounded w-full sm:w-1/4"
+        >
+          <option value="all">All Roles</option>
+          <option value="admin">Admin</option>
+          <option value="librarian">Librarian</option>
+          <option value="member">Member</option>
+        </select>
       </div>
 
       {/* Desktop Table */}
@@ -101,14 +120,16 @@ const UserManagement = () => {
           <tr className="bg-slate-200">
             <th className="border p-2">Name</th>
             <th className="border p-2">Email</th>
+            <th className="border p-2">Role</th>
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {filteredUsers.map((user) => (
-            <tr key={user.id} className="text-center">
+            <tr key={user._id} className="text-center">
               <td className="border p-2">{user.name}</td>
               <td className="border p-2">{user.email}</td>
+              <td className="border p-2 capitalize">{user.role || "user"}</td>
               <td className="border p-2 space-x-2">
                 <button
                   onClick={() => handleEditUser(user)}
@@ -117,22 +138,22 @@ const UserManagement = () => {
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDeleteUser(user.id)}
+                  onClick={() => handleDeleteUser(user._id)}
                   className="bg-red-500 text-white px-2 py-1 rounded"
                 >
                   Delete
                 </button>
                 <button
-                  onClick={() => handleViewIssued(user.id)}
+                  onClick={() => handleViewIssued(user._id)}
                   className="bg-blue-500 text-white px-2 py-1 rounded"
                 >
-                  Issued Books
+                  Issued
                 </button>
                 <button
-                  onClick={() => handleViewReturned(user.id)}
+                  onClick={() => handleViewReturned(user._id)}
                   className="bg-green-500 text-white px-2 py-1 rounded"
                 >
-                  Returned Books
+                  Returned
                 </button>
               </td>
             </tr>
@@ -144,11 +165,14 @@ const UserManagement = () => {
       <div className="md:hidden grid gap-4">
         {filteredUsers.map((user) => (
           <div
-            key={user.id}
+            key={user._id}
             className="bg-white p-4 rounded-lg shadow flex flex-col gap-2"
           >
             <p className="font-semibold text-lg">{user.name}</p>
             <p className="text-sm text-gray-600">{user.email}</p>
+            <p className="text-sm text-gray-800 capitalize">
+              Role: {user.role || "member"}
+            </p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => handleEditUser(user)}
@@ -157,22 +181,22 @@ const UserManagement = () => {
                 Edit
               </button>
               <button
-                onClick={() => handleDeleteUser(user.id)}
+                onClick={() => handleDeleteUser(user._id)}
                 className="bg-red-500 text-white px-3 py-1 rounded flex-1"
               >
                 Delete
               </button>
               <button
-                onClick={() => handleViewIssued(user.id)}
+                onClick={() => handleViewIssued(user._id)}
                 className="bg-blue-500 text-white px-3 py-1 rounded flex-1"
               >
-                Issued Books
+                Issued
               </button>
               <button
-                onClick={() => handleViewReturned(user.id)}
+                onClick={() => handleViewReturned(user._id)}
                 className="bg-green-500 text-white px-3 py-1 rounded flex-1"
               >
-                Returned Books
+                Returned
               </button>
             </div>
           </div>
@@ -214,6 +238,17 @@ const UserManagement = () => {
                     }
                     className="border p-2 rounded w-full"
                   />
+                  <select
+                    value={editForm.role}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, role: e.target.value })
+                    }
+                    className="border p-2 rounded w-full"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="librarian">Librarian</option>
+                    <option value="member">Member</option>
+                  </select>
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => setActiveModal(null)}
@@ -253,7 +288,10 @@ const UserManagement = () => {
                     ? selectedUserIssued
                     : selectedUserReturned
                   ).map((book) => (
-                    <div key={book.id} className="p-2 border rounded">
+                    <div
+                      key={book.id || book._id}
+                      className="p-2 border rounded"
+                    >
                       <p className="font-medium">{book.title}</p>
                       <p className="text-sm text-gray-600">
                         Issue Date: {book.issueDate}
@@ -269,12 +307,6 @@ const UserManagement = () => {
                       )}
                     </div>
                   ))}
-                  {(activeModal === "issued"
-                    ? selectedUserIssued
-                    : selectedUserReturned
-                  ).length === 0 && (
-                    <p className="text-center text-gray-500">No books found.</p>
-                  )}
                 </div>
               </>
             )}
