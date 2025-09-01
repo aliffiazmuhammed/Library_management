@@ -1,9 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { findallbooks } =require("../controllers/bookController")
+const bookController = require("../controllers/bookController");
+
+// CRUD operations
+router.get("/", bookController.getAllBooks);
+router.post("/", bookController.addBook);
+router.put("/:id", bookController.updateBook);
+router.delete("/:id", bookController.deleteBook);
+
+// Issue / Return
+router.put("/issue/:id", bookController.issueBook);
+router.put("/return/:id", bookController.returnBook);
 
 
-// Get all books
-router.get("/all",findallbooks );
 
 module.exports = router;
