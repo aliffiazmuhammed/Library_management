@@ -138,3 +138,12 @@ exports.getAllIssuedBooks = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch issued books", error: err.message });
     }
 };
+
+exports.availableBooks = async (req, res) => {
+    try {
+        const availableBooks = await Book.find({ status: "available" });
+        res.json(availableBooks);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}

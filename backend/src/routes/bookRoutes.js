@@ -15,5 +15,8 @@ router.put("/return/:id", bookController.returnBook);
 //issuedbooks that are active
 router.get("/allissued",bookController.getAllIssuedBooks)
 
+// Get available books
+router.get("/available", bookController.availableBooks);
+
 
 module.exports = router;
