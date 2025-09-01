@@ -1,7 +1,9 @@
 export const sidebarConfig = {
   admin: [
-    { label: "Manage Users", key: "manageUsers" },
-    { label: "Manage Books", key: "manageBooks" },
+    { label: "Manage Users", key: "manageusers" },
+    { label: "Manage Books", key: "manage" },
+    { key: "allissued", label: "Issued Books" },
+    { key: "allreturned", label: "Returned Books" },
   ],
   librarian: [
     { key: "manage", label: "Manage Books" },

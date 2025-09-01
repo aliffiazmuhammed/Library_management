@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = (email, password) => {
         if (email === "admin@lib.com") {
-            const adminUser = { name: "Admin", role: "Admin", token: "dummy" };
+            const adminUser = { name: "admin", role: "admin", token: "dummy" };
             setUser(adminUser);
             localStorage.setItem("user", JSON.stringify(adminUser));
             return true;
