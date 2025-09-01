@@ -1,41 +1,81 @@
-
-import React, { createContext, useState, useEffect } from "react";
+// src/context/AuthContext.js
+import React, { createContext, useState } from "react";
+import axios from "axios";
+import { registerRoute } from "@/utils/APIRoutes";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem("user");
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-    const login = (email, password) => {
-        if (email === "admin@lib.com") {
-            const adminUser = { name: "admin", role: "admin", token: "dummy" };
-            setUser(adminUser);
-            localStorage.setItem("user", JSON.stringify(adminUser));
-            return true;
-        } else if (email === "librarian@lib.com") {
-            const librarianUser = { name: "librarian", role: "librarian", token: "dummy" };
-            setUser(librarianUser);
-            localStorage.setItem("user", JSON.stringify(librarianUser));
-            return true;
-        } else {
-            const memberUser = { name: "member", role: "member", token: "dummy" };
-            setUser(memberUser);
-            localStorage.setItem("user", JSON.stringify(memberUser));
-            return true;
-        }
+  // --------------------------
+  // Register
+  // --------------------------
+  const register = async (name, email, password) => {
+    try {
+      const res = await axios.post(registerRoute, {
+        name,
+        email,
+        password,
+      });
+
+      const data = res.data;
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+      return true;
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      return false;
+    }
+  };
+
+  // --------------------------
+  // Login
+  // --------------------------
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
+
+      const data = res.data;
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+      return true;
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      return false;
+    }
+  };
+
+  // --------------------------
+  // Logout
+  // --------------------------
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+  };
+
+  // --------------------------
+  // Get auth header for protected requests
+  // --------------------------
+  const getAuthHeader = () => {
+    return {
+      headers: {
+        Authorization: `Bearer ${user?.token}`,
+      },
     };
+  };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("user");
-    };
-
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider
+      value={{ user, register, login, logout, getAuthHeader }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

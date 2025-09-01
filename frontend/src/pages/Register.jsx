@@ -11,20 +11,21 @@ const Register = ()=> {
   const { register } = useContext(AuthContext); // 🔹 assumes register exists in your AuthContext
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
 
-    if (register(name, email, password)) {
-      navigate("/dashboard");
-    } else {
-      alert("Registration failed. Try again.");
-    }
-  };
+  const success = await register(name, email, password);
+  if (success) {
+    navigate("/dashboard");
+  } else {
+    alert("Registration failed. Check console for errors.");
+  }
+};
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

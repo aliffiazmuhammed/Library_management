@@ -9,14 +9,15 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (login(email, password)) {
-      navigate("/dashboard");
-    } else {
-      alert("Invalid credentials");
-    }
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  const success = await login(email, password);
+  if (success) {
+    navigate("/dashboard");
+  } else {
+    alert("Invalid email or password");
+  }
+};
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
