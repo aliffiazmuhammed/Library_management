@@ -5,7 +5,7 @@ const cors = require("cors");
 const connectDB = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const bookRoutes = require("./src/routes/bookRoutes")
-
+const issuanceRoutes = require("./src/routes/issuanceRoutes")
 dotenv.config();
 connectDB();
 
@@ -16,6 +16,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
+app.use("/api/issuance",issuanceRoutes)
 
 // Global error handler
 app.use((err, req, res, next) => {

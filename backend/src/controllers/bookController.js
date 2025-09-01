@@ -107,3 +107,34 @@ exports.returnBook = async (req, res) => {
     }
 };
 
+exports.getAllIssuedBooks = async (req, res) => {
+    try {
+        // Find all issuance records where returnDate is null (not returned)
+        const issuedRecords = await Issuance.find({ returnDate: null })
+            .populate("bookId") // get book details
+            .populate("userId", "name email") // get user details
+            .sort({ issueDate: -1 });
+
+        // Format response
+        const issuedBooks = issuedRecords.map((record) => ({
+            _id: record._id,
+            title: record.bookId.title,
+            genre: record.bookId.genre,
+            author: record.bookId.author,
+            publicationDate: record.bookId.publicationDate,
+            status: record.bookId.status,
+            issuedTo: {
+                _id: record.userId._id,
+                name: record.userId.name,
+                email: record.userId.email,
+            },
+            issueDate: record.issueDate,
+            dueDate: record.dueDate,
+        }));
+
+        res.json(issuedBooks);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch issued books", error: err.message });
+    }
+};

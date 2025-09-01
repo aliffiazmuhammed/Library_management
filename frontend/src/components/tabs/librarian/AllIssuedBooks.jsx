@@ -1,41 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { allBookRoute } from "@/utils/APIRoutes";
 
 const AllIssuedBooks = ({ onReturn }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [books, setBooks] = useState([
-    {
-      id: 1,
-      title: "Clean Code",
-      issuedTo: { name: "John Doe", email: "john@example.com" },
-      issueDate: "2025-08-01",
-      dueDate: "2025-08-15",
-      returned: false,
-    },
-    {
-      id: 2,
-      title: "Atomic Habits",
-      issuedTo: { name: "Jane Smith", email: "jane@example.com" },
-      issueDate: "2025-08-03",
-      dueDate: "2025-08-17",
-      returned: false,
-    },
-  ]);
+  const [books, setBooks] = useState([]);
 
-  const handleReturn = (id) => {
-    const updatedBooks = books.map((b) =>
-      b.id === id
-        ? {
-            ...b,
-            returned: true,
-            returnDate: new Date().toISOString().split("T")[0],
-          }
-        : b
-    );
-    setBooks(updatedBooks);
+  // Fetch all currently issued books
+  const fetchIssuedBooks = async () => {
+    try {
+      const res = await axios.get(`${allBookRoute}/allissued`); // backend endpoint that returns issued books
+      setBooks(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    if (onReturn) {
-      const returnedBook = updatedBooks.find((b) => b.id === id);
-      onReturn(returnedBook);
+  useEffect(() => {
+    fetchIssuedBooks();
+  }, []);
+
+  // Handle returning a book
+  const handleReturn = async (bookId) => {
+    try {
+      const res = await axios.put(`/api/books/return/${bookId}`); // call your returnBook API
+      // Update local state
+      setBooks(books.filter((b) => b._id !== bookId));
+
+      if (onReturn) {
+        onReturn(res.data.book);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -67,58 +63,56 @@ const AllIssuedBooks = ({ onReturn }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredBooks.map(
-            (book) =>
-              !book.returned && (
-                <tr key={book.id} className="text-center">
-                  <td className="border p-2">{book.title}</td>
-                  <td className="border p-2">
-                    {book.issuedTo.name} ({book.issuedTo.email})
-                  </td>
-                  <td className="border p-2">{book.issueDate}</td>
-                  <td className="border p-2">{book.dueDate}</td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => handleReturn(book.id)}
-                      className="bg-green-500 text-white px-2 py-1 rounded"
-                    >
-                      Return
-                    </button>
-                  </td>
-                </tr>
-              )
-          )}
+          {filteredBooks.map((book) => (
+            <tr key={book._id} className="text-center">
+              <td className="border p-2">{book.title}</td>
+              <td className="border p-2">
+                {book.issuedTo.name} ({book.issuedTo.email})
+              </td>
+              <td className="border p-2">
+                {new Date(book.issueDate).toLocaleDateString()}
+              </td>
+              <td className="border p-2">
+                {new Date(book.dueDate).toLocaleDateString()}
+              </td>
+              <td className="border p-2">
+                <button
+                  onClick={() => handleReturn(book._id)}
+                  className="bg-green-500 text-white px-2 py-1 rounded"
+                >
+                  Return
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
       {/* Mobile Cards */}
       <div className="md:hidden grid gap-4">
-        {filteredBooks.map(
-          (book) =>
-            !book.returned && (
-              <div
-                key={book.id}
-                className="bg-white p-4 rounded-lg shadow flex flex-col gap-1"
-              >
-                <h3 className="font-semibold text-lg">{book.title}</h3>
-                <p className="text-sm text-gray-700">
-                  Issued To: {book.issuedTo.name} ({book.issuedTo.email})
-                </p>
-                <p className="text-sm text-gray-700">
-                  Issue Date: {book.issueDate}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Due Date: {book.dueDate}
-                </p>
-                <button
-                  onClick={() => handleReturn(book.id)}
-                  className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
-                >
-                  Return
-                </button>
-              </div>
-            )
-        )}
+        {filteredBooks.map((book) => (
+          <div
+            key={book._id}
+            className="bg-white p-4 rounded-lg shadow flex flex-col gap-1"
+          >
+            <h3 className="font-semibold text-lg">{book.title}</h3>
+            <p className="text-sm text-gray-700">
+              Issued To: {book.issuedTo.name} ({book.issuedTo.email})
+            </p>
+            <p className="text-sm text-gray-700">
+              Issue Date: {new Date(book.issueDate).toLocaleDateString()}
+            </p>
+            <p className="text-sm text-gray-700">
+              Due Date: {new Date(book.dueDate).toLocaleDateString()}
+            </p>
+            <button
+              onClick={() => handleReturn(book._id)}
+              className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
+            >
+              Return
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

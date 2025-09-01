@@ -12,6 +12,8 @@ router.delete("/:id", bookController.deleteBook);
 router.put("/issue/:id", bookController.issueBook);
 router.put("/return/:id", bookController.returnBook);
 
+//issuedbooks that are active
+router.get("/allissued",bookController.getAllIssuedBooks)
 
 
 module.exports = router;

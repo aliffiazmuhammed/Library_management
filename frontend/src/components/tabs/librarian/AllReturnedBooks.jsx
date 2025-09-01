@@ -1,11 +1,35 @@
-import React, { useState } from "react";
-
-const AllReturnedBooks = ({ returnedBooks }) => {
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { allreturnedbookRoute } from "@/utils/APIRoutes";
+const AllReturnedBooks = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [returnedBooks, setReturnedBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch returned books from backend
+  useEffect(() => {
+    const fetchReturnedBooks = async () => {
+      try {
+        const res = await axios.get(allreturnedbookRoute);
+        setReturnedBooks(res.data);
+      } catch (err) {
+        console.error("Error fetching returned books:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReturnedBooks();
+  }, []);
+
+  // Filter books
   const filteredBooks = (returnedBooks || []).filter((book) =>
     book.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <p className="p-4 text-gray-500">Loading returned books...</p>;
+  }
 
   return (
     <div className="p-4">
@@ -31,13 +55,17 @@ const AllReturnedBooks = ({ returnedBooks }) => {
         </thead>
         <tbody>
           {filteredBooks.map((book) => (
-            <tr key={book.id} className="text-center">
+            <tr key={book._id} className="text-center">
               <td className="border p-2">{book.title}</td>
               <td className="border p-2">
-                {book.issuedTo.name} ({book.issuedTo.email})
+                {book.issuedTo?.name} ({book.issuedTo?.email})
               </td>
-              <td className="border p-2">{book.issueDate}</td>
-              <td className="border p-2">{book.returnDate}</td>
+              <td className="border p-2">
+                {new Date(book.issueDate).toLocaleDateString()}
+              </td>
+              <td className="border p-2">
+                {new Date(book.returnDate).toLocaleDateString()}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -47,18 +75,18 @@ const AllReturnedBooks = ({ returnedBooks }) => {
       <div className="md:hidden grid gap-4">
         {filteredBooks.map((book) => (
           <div
-            key={book.id}
+            key={book._id}
             className="bg-white p-4 rounded-lg shadow flex flex-col gap-1"
           >
             <h3 className="font-semibold text-lg">{book.title}</h3>
             <p className="text-sm text-gray-700">
-              Issued To: {book.issuedTo.name} ({book.issuedTo.email})
+              Issued To: {book.issuedTo?.name} ({book.issuedTo?.email})
             </p>
             <p className="text-sm text-gray-700">
-              Issue Date: {book.issueDate}
+              Issue Date: {new Date(book.issueDate).toLocaleDateString()}
             </p>
             <p className="text-sm text-gray-700">
-              Return Date: {book.returnDate}
+              Return Date: {new Date(book.returnDate).toLocaleDateString()}
             </p>
           </div>
         ))}
