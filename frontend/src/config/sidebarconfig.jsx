@@ -4,8 +4,9 @@ export const sidebarConfig = {
     { label: "Manage Books", key: "manageBooks" },
   ],
   librarian: [
-    { label: "Manage Books", key: "manageBooks" },
-    { label: "Issued Books", key: "issuedBooks" },
+    { key: "manage", label: "Manage Books" },
+    { key: "allissued", label: "Issued Books" },
+    { key: "allreturned", label: "Returned Books" },
   ],
   member: [
     { label: "Search Books", key: "search" },

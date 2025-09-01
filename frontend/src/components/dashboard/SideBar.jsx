@@ -8,7 +8,7 @@ const SideBar = ({ active, setActiveTab, isOpen, onClose }) => {
   const { user } = React.useContext(AuthContext);
 
   if (!user) return null;
-
+  console.log(user.role)
   const menuItems = sidebarConfig[user.role] || [];
 
   return (

@@ -3,6 +3,9 @@ import SearchBooks from "../tabs/SearchBooks";
 import AvailableBooks from "../tabs/AvailableBooks";
 import IssuedBooks from "../tabs/IssuedBooks";
 import ReturnedBooks from "../tabs/ReturnedBooks";
+import ManageBooks from "../tabs/librarian/ManageBooks";
+import AllReturnedBooks from "../tabs/librarian/AllReturnedBooks";
+import AllIssuedBooks from "../tabs/librarian/AllIssuedBooks";
 
 const ContentArea = ({ activeTab }) => {
   switch (activeTab) {
@@ -14,6 +17,12 @@ const ContentArea = ({ activeTab }) => {
       return <IssuedBooks />;
     case "returned":
       return <ReturnedBooks />;
+    case "manage":
+      return <ManageBooks />;
+    case "allreturned":
+      return <AllReturnedBooks />;
+    case "allissued":
+      return <AllIssuedBooks />;
     default:
       return <SearchBooks />;
   }

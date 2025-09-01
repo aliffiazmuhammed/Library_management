@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem("user", JSON.stringify(adminUser));
             return true;
         } else if (email === "librarian@lib.com") {
-            const librarianUser = { name: "Librarian", role: "Librarian", token: "dummy" };
+            const librarianUser = { name: "librarian", role: "librarian", token: "dummy" };
             setUser(librarianUser);
             localStorage.setItem("user", JSON.stringify(librarianUser));
             return true;
