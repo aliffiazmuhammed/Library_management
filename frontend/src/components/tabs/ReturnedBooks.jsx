@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "@/context/AuthContext";
+import { host } from "@/utils/APIRoutes";
 
 const ReturnedBooks = ({ userId }) => {
   const [books, setBooks] = useState([]);
@@ -17,7 +18,7 @@ const { user } = React.useContext(AuthContext);
     const fetchReturnedBooks = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/issuance/returnbooks/${userId}?status=returned`
+          `${host}/api/issuance/returnbooks/${userId}?status=returned`
         );
         setBooks(res.data);
       } catch (err) {

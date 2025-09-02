@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "@/context/AuthContext";
+import { host } from "@/utils/APIRoutes";
 
 const IssuedBooks = () => {
   const [books, setBooks] = useState([]);
@@ -16,7 +17,7 @@ const { user } = React.useContext(AuthContext);
         console.log(userId);
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/issuance/issuedbooks/${userId}/issued`
+          `${host}/api/issuance/issuedbooks/${userId}/issued`
         );
         setBooks(res.data);
       } catch (err) {
