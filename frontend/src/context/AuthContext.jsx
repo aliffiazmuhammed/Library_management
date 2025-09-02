@@ -2,7 +2,7 @@
 import React, { createContext, useState } from "react";
 import axios from "axios";
 import { registerRoute } from "@/utils/APIRoutes";
-
+import { host } from "@/utils/APIRoutes";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   // --------------------------
   const login = async (email, password) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${host}/api/auth/login`, {
         email,
         password,
       });
