@@ -8,17 +8,16 @@ const ReturnedBooks = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
-const { user } = React.useContext(AuthContext);
-  // Fetch returned books for the specific user
+  const { user } = React.useContext(AuthContext);
+
   useEffect(() => {
-    const userId = user._id
-    console.log(userId)
-    if (!userId) return;
+    const uid = user._id; // avoid shadowing
+    if (!uid) return;
 
     const fetchReturnedBooks = async () => {
       try {
         const res = await axios.get(
-          `${host}/api/issuance/returnbooks/${userId}?status=returned`
+          `${host}/api/issuance/returnbooks/${uid}?status=returned`
         );
         setBooks(res.data);
       } catch (err) {
@@ -29,15 +28,21 @@ const { user } = React.useContext(AuthContext);
     };
 
     fetchReturnedBooks();
-  }, [userId]);
+  }, [userId, user._id]);
 
-  if (loading) return <p className="p-4">Loading returned books...</p>;
+  // 🔹 Spinner UI
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+        <span className="ml-3 text-gray-600">Loading returned books...</span>
+      </div>
+    );
+
   if (books.length === 0) return <p className="p-4">No returned books yet.</p>;
 
-  // Extract unique genres for filter dropdown
   const genres = ["All", ...new Set(books.map((b) => b.genre))];
 
-  // Filter and search
   const filteredBooks = books.filter((book) => {
     const matchesSearch =
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

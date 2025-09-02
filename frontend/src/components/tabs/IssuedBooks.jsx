@@ -8,13 +8,12 @@ const IssuedBooks = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
-const { user } = React.useContext(AuthContext);
+  const { user } = React.useContext(AuthContext);
+
   // Fetch active issued books for the specific user
   const userId = user._id;
   useEffect(() => {
     const fetchIssuedBooks = async () => {
-      
-        console.log(userId);
       try {
         const res = await axios.get(
           `${host}/api/issuance/issuedbooks/${userId}/issued`
@@ -30,7 +29,14 @@ const { user } = React.useContext(AuthContext);
     if (userId) fetchIssuedBooks();
   }, [userId]);
 
-  if (loading) return <p className="p-4">Loading issued books...</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <span className="ml-2 text-blue-600">Loading issued books...</span>
+      </div>
+    );
+
   if (books.length === 0) return <p className="p-4">No active issued books.</p>;
 
   // Extract unique genres for filter dropdown

@@ -12,9 +12,7 @@ const AvailableBooks = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await axios.get(
-          `${allBookRoute}/available`
-        );
+        const res = await axios.get(`${allBookRoute}/available`);
         setBooks(res.data);
       } catch (err) {
         console.error("Error fetching available books:", err);
@@ -26,7 +24,11 @@ const AvailableBooks = () => {
   }, []);
 
   if (loading) {
-    return <p className="p-4">Loading available books...</p>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   if (books.length === 0) {

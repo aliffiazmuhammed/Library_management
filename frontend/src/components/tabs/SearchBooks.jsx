@@ -7,10 +7,12 @@ const SearchBooks = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [genreFilter, setGenreFilter] = useState("all");
   const [genres, setGenres] = useState([]);
+  const [loading, setLoading] = useState(true); // 👈 Loading state
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
+        setLoading(true); // Start loading
         const res = await axios.get(allBookRoute);
         setBooks(res.data);
 
@@ -22,6 +24,8 @@ const SearchBooks = () => {
         setGenres(uniqueGenres);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
 
@@ -73,32 +77,38 @@ const SearchBooks = () => {
         </select>
       </div>
 
-      {/* Book Cards */}
-      <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
-        {filteredBooks.length > 0 ? (
-          filteredBooks.map((book) => (
-            <div
-              key={book._id}
-              className="p-4 border rounded-md shadow-sm bg-white"
-            >
-              <h3 className="font-semibold">{book.title}</h3>
-              <p className="text-sm text-gray-600">Author: {book.author}</p>
-              <p className="text-sm text-gray-500">Genre: {book.genre}</p>
-              <p
-                className={`text-sm font-medium ${
-                  book.status.toLowerCase() === "available"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+      {/* Loading State */}
+      {loading ? (
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
+          {filteredBooks.length > 0 ? (
+            filteredBooks.map((book) => (
+              <div
+                key={book._id}
+                className="p-4 border rounded-md shadow-sm bg-white"
               >
-                Status: {book.status}
-              </p>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500">No books found.</p>
-        )}
-      </div>
+                <h3 className="font-semibold">{book.title}</h3>
+                <p className="text-sm text-gray-600">Author: {book.author}</p>
+                <p className="text-sm text-gray-500">Genre: {book.genre}</p>
+                <p
+                  className={`text-sm font-medium ${
+                    book.status.toLowerCase() === "available"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  Status: {book.status}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No books found.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
