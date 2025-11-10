@@ -147,3 +147,17 @@ exports.availableBooks = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }
+
+exports.whatsappbook = async (req, res) => {
+  const { time } = req.body;
+
+  if (!time) {
+    return res.status(400).json({ message: "Time is required" });
+  }
+
+  if (time === 10) {
+    return res.status(200).json({ message: "Successfully Booked" });
+  } else {
+    return res.status(400).json({ message: "Booking not allowed for this time" });
+  }
+}
