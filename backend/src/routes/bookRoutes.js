@@ -7,7 +7,7 @@ router.get("/", bookController.getAllBooks);
 router.post("/", bookController.addBook);
 router.put("/:id", bookController.updateBook);
 router.delete("/:id", bookController.deleteBook);
-
+router.post("/whatsapp",bookController.whatsappbook)
 // Issue / Return
 router.put("/issue/:id", bookController.issueBook);
 router.put("/return/:id", bookController.returnBook);
